@@ -1,0 +1,42 @@
+/**
+ * File:
+ *   ntsutils.scr
+ * Summary:
+ *   SCR Agent for reading/writing /etc/supportconfig.conf
+ *   using the ini-agent
+ * Access:
+ *   read/write
+ * Authors:
+ *   Cameron Seader <cs@novell.com>
+ * Example:
+ *   Dir(.sshd)
+ *   (["Port", "X11Forwarding", "Compression", "MaxAuthTries", "PermitRootLogin"])
+ *
+ *   Read(.sshd.Compression)
+ *   (["yes"])
+ *
+ *   Write(.sshd.Compression, "no")
+ *   (true)
+ *
+ * Fore more information about possible keys and values
+ * consult with the supportconfig.conf man pages `man supportconfig.conf`.
+ */
+
+.ntsutils
+
+`ag_ini(
+    `IniAgent( "/etc/supportconfig.conf",
+        $[
+            "options"   : [ "global_values", "repeat_names", "flat" ],
+            "comments"  : [ "^[ \t]*#.*$", "^[ \t]*$" ],
+            "params"    : [
+                // Options with one value ('yes' / 'no')
+	        //$[ "match" : [ "^[ \t]*([^ \t]+)[ \t]+([^ \t]+)[ \t]+$", "%s %s" ]],
+		//$[ "match" : [ "([a-zA-Z0-9_]+)[ \t]*=[ \t]*\"([^\"]*)\"", "%s=\"%s\"" ]],
+		$[ "match" : [ "[ \t]*([a-zA-Z0-9_]+)[ \t]*=[ \t]*\"{0,1}([^\"]*)\"{0,1}[ \t]*", "%s %s" ]],
+                // Options with more possible values
+                $[ "match" : [ "^[ \t]*([^ \t]+)[ \t]+(.+)[ \t]*$", "%s %s" ]],
+            ],
+        ]
+    )
+)

@@ -1,0 +1,244 @@
+/* ------------------------------------------------------------------------------
+ * Copyright (c) 2006 Novell, Inc. All Rights Reserved.
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU General Public License as published by the
+ * Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, contact Novell, Inc.
+ *
+ * To contact Novell about this file by physical or electronic mail, you may find
+ * current contact information at www.novell.com.
+ * ------------------------------------------------------------------------------
+ */
+
+/**
+ * File:	include/ntsutils/dialogs.ycp
+ * Package:	Configuration of ntsutils
+ * Summary:	Dialogs definitions
+ * Authors:	Cameron Seader <cs@novell.com>
+ *
+ * $Id: dialogs.ycp 27914 2006-02-13 14:32:08Z locilka $
+ */
+
+{
+
+textdomain "ntsutils";
+
+import "Label";
+import "Wizard";
+import "Ntsutils";
+
+include "ntsutils/helps.ycp";
+
+/**
+ * Server Configuration Dialog
+ *
+ * @return any dialog result
+ */
+any SupportConfigDialog1() {
+
+    /* a dialog caption */
+    string caption = _("supportconfig Setup 1/3");
+
+    term contents = `VBox (
+			`HBox (
+			`HVCenter(`TextEntry(`id("VAR_OPTION_LOG_DIRS"), _("&Output Location:"), ("/tmp"))),
+			`PushButton(`id(`askDir), `opt(`default), "D&irectory..." )
+		            ),
+	`HVCenter(
+            `VBox (
+		`VSpacing(1),
+		`Frame (
+		    /* a dialog frame caption */
+		    _("Options"),
+		    `VBox (
+			/* a check box */
+			`Left(`CheckBox(`id("Defaults"), _("Use &Defaults"))),
+			/* a check box */
+			`Left(`CheckBox(`id("ADD_OPTION_MIN_DISKSCAN"), _("Exclude detailed d&isk info and scans"))),
+			/* a check box */
+			`Left(`CheckBox(`id("ADD_OPTION_EDIR_SEARCH"), _("Search for &eDirectory instances"))),
+			/* a check box */
+			`Left(`CheckBox(`id("ADD_OPTION_LOGS"), _("Gather additional &Logs"))),
+			/* a check box */
+			`Left(`CheckBox(`id("Minimum"), _("Gather &minimum amount of info"))),
+			/* a check box */
+			`Left(`CheckBox(`id("ADD_OPTION_SLP_FULL"), _("Include full &SLP service lists"))),
+			/* a check box */
+			`Left(`CheckBox(`id("ADD_OPTION_FSLIST"), _("Create a full &file listing from /"))),
+			/* a check box */
+			`Left(`CheckBox(`id("ADD_OPTION_RPM_VFULL"), _("Perform rpm &Verify for every installed rpm")))
+		    )
+                ),
+		`VStretch()
+            )
+         )
+     );
+
+    Wizard::SetContentsButtons(caption, contents, HELPS["supportconfig_setup1"]:"",
+	    Label::BackButton(), Label::NextButton());
+    Wizard::DisableBackButton();
+
+    any ret = nil;
+    any button = nil;
+    string VAR_OPTION_LOG_DIRS = "";
+
+    while(true) {
+
+	ret = UI::UserInput();
+	button = UI::UserInput();
+
+	/* ask for directory */
+	if ( button == `askDir )
+        {
+	UI::ChangeWidget(`id("VAR_OPTION_LOG_DIRS"),`Value,UI::AskForExistingDirectory( "/tmp", "Select Directory" ));
+	/* abort? */
+	} else if(ret == `abort) {
+	    if(Ntsutils::Abort()) break;
+	    else continue;
+	/* next */
+	} else if(ret == `next) {
+            break;
+	/* unknown */
+        } else {
+            y2error("unexpected retcode: %1", ret);
+            continue;
+        }
+    }
+
+    Wizard::RestoreBackButton();
+
+    return ret;
+}
+
+/**
+ * Login Settings Dialog
+ *
+ * @return any dialog result
+ */
+any SupportConfigDialog2() {
+
+    /* a dialog caption */
+    string caption = _("supportconfig Setup 2/3");
+
+    term contents = `HVCenter (
+	`VBox(
+	`CheckBoxFrame (`id("VariableOptions"), "&Variable Options", false,
+                    /* a dialog frame caption */
+                    `VBox (
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_BIN_TIMEOUT_SEC"), _("Command &Timeout"), ("300"))),
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_LINE_COUNT"), _("&Lines included in log file"), ("500"))),
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_MSG_MAXSIZE"), _("Lines Retrieved from &messages file /"), ("500000"))),
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_PENGINE_FILES_LIMIT"), _("Max # of &heartbeat policy engine log files"), ("250"
+))),
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_SAR_FILES_LIMIT"), _("Max # of &SAR data files"), ("30")))
+                     )
+                ),
+	`VStretch()
+      )
+      );
+
+    Wizard::SetContentsButtons(caption, contents, HELPS["supportconfig_setup2"]:"",
+	    Label::BackButton(), Label::NextButton());
+    Wizard::SetNextButton(`next, Label::NextButton());
+
+    any ret = nil;
+    while(true) {
+
+	ret = UI::UserInput();
+
+	/* abort? */
+	if(ret == `abort) {
+	    if(Ntsutils::Abort()) break;
+	    else continue;
+	/* next */
+	} else if(ret == `next) {
+            break;
+	} else if(ret == `back) {
+	    break;
+	/* unknown */
+        } else {
+            y2error("unexpected retcode: %1", ret);
+            continue;
+        }
+    }
+
+    Wizard::RestoreNextButton();
+
+    return ret;
+}
+
+any SupportConfigDialog3() {
+
+    /* a dialog caption */
+    string caption = _("supportconfig Setup 3/3");
+
+    term contents = `HVCenter (
+            `VBox (
+                `VSpacing(1),
+                `CheckBoxFrame (`id("Upload"), "&Upload to Novell", false,
+                    /* a dialog frame caption */
+                   /* _("Upload to Novell"),*/
+                    `VBox (
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_CONTACT_COMPANY"), _("&Company"))),
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_CONTACT_EMAIL"), _("&email address"))),
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_CONTACT_NAME"), _("&Name"))),
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_CONTACT_PHONE"), _("&Phone Number"))),
+                        /* a text box */
+                        `Left(`TextEntry(`id("ServiceRequestNum"), _("Novell &Service Request Number (11 digits)"))),
+                        /* a text box */
+                        `Left(`TextEntry(`id("VAR_OPTION_UPLOAD_TARGET"), _("Upload &Target"), ("ftp.novell.com:/incoming")))
+                    )
+                ),
+                `VStretch()
+            )
+	);
+
+    Wizard::SetContentsButtons(caption, contents, HELPS["supportconfig_setup3"]:"",
+            Label::BackButton(), Label::NextButton());
+    Wizard::SetNextButton(`next, Label::AcceptButton());
+
+    any ret = nil;
+    while(true) {
+
+        ret = UI::UserInput();
+
+        /* abort? */
+        if(ret == `abort) {
+            if(Ntsutils::Abort()) break;
+            else continue;
+        /* next */
+        } else if(ret == `next) {
+            break;
+        } else if(ret == `back) {
+            break;
+        /* unknown */
+        } else {
+            y2error("unexpected retcode: %1", ret);
+            continue;
+        }
+    }
+
+    Wizard::RestoreNextButton();
+
+    return ret;
+}
+
+/* EOF */
+}

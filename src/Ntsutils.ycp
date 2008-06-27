@@ -1,0 +1,244 @@
+/* ------------------------------------------------------------------------------
+ * Copyright (c) 2006 Novell, Inc. All Rights Reserved.
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU General Public License as published by the
+ * Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, contact Novell, Inc.
+ *
+ * To contact Novell about this file by physical or electronic mail, you may find
+ * current contact information at www.novell.com.
+ * ------------------------------------------------------------------------------
+ */
+
+/**
+ * File:	modules/Ntsutils.ycp
+ * Package:	Configuration of ntsutils
+ * Summary:	Ntsutils settings, input and output functions
+ * Authors:	Cameron Seader <cs@novell.com>
+ *
+ * $Id: Ntsutils.ycp 41350 2007-10-10 16:59:00Z dfiser $
+ *
+ * Representation of the configuration of ntsutils.
+ * Input and output routines.
+ */
+
+{
+
+module "Ntsutils";
+textdomain "ntsutils";
+
+import "SCR";
+import "Progress";
+import "Report";
+import "Summary";
+import "Message";
+import "Service";
+import "Popup";
+
+/**
+ * Data was modified?
+ */
+boolean modified = false;
+
+/**
+ * Sleep time between Read or Write steps
+ */
+integer sl = 1000;
+
+/**
+ * Returns whether the configuration has been modified.
+ */
+global boolean GetModified() {
+	return modified;
+}
+
+/**
+ * Sets the configuration has been modified.
+ */
+global void SetModified() {
+	modified = true;
+}
+
+/**
+  * Sets the map of supportconfig settings.
+  */
+
+map <string, list<string> > SETTINGS = $[];
+
+map <string, list<string> > DEFAULT_CONFIG = $[
+     "VAR_OPTION_LOG_DIRS"		: ["/tmp"],
+     "ADD_OPTION_SLP_FULL"		: ["0"],
+     "ADD_OPTION_RPM_VFULL"		: ["0"],
+     "ADD_OPTION_LOGS"			: ["0"],
+     "ADD_OPTION_MIN_DISKSCAN"		: ["0"],
+     "ADD_OPTION_EDIR_SEARCH"		: ["0"],
+     "ADD_OPTION_FSLIST"		: ["0"],
+     "VAR_OPTION_BIN_TIMEOUT_SEC"	: ["300"],
+     "VAR_OPTION_LINE_COUNT"		: ["500"],
+     "VAR_OPTION_MSG_MAXSIZE"		: ["500000"],
+     "VAR_OPTION_PENGINE_FILES_LIMIT"	: ["250"],
+     "VAR_OPTION_SAR_FILES_LIMIT"	: ["30"],
+     "VAR_OPTION_CONTACT_COMPANY"       : [""],
+     "VAR_OPTION_CONTACT_EMAIL"		: [""],
+     "VAR_OPTION_CONTACT_NAME"		: [""],
+     "VAR_OPTION_CONTACT_PHONE"		: [""],
+     "VAR_OPTION_UPLOAD_TARGET"		: ["ftp.novell.com:/incoming"],
+     ];
+
+/**
+ * Returns the supportconfig Option as a list of strings.
+ *
+ * @param string option_key of the supportconfig configuration
+ * @return list <string> with option_values
+ */
+global list <string> GetsupportconfigOption (string option_key) {
+    return SETTINGS[option_key]:DEFAULT_CONFIG[option_key]:[];
+}
+
+/**
+ * Sets values for an option.
+ *
+ * @param string option_key with the supportconfig configuration key
+ * @param list <string> option_values with the supportconfig configuration values
+ */
+global void SetsupportconfigOption (string option_key, list <string> option_vals) {
+    SETTINGS[option_key] = option_vals;
+}
+
+/**
+ * Returns a confirmation popup dialog whether user wants to really abort.
+ */
+global boolean Abort() {
+    return Popup::ReallyAbort(GetModified());
+}
+
+/**
+ * Checks whether an Abort button has been pressed.
+ * If so, calls function to confirm the abort call.
+ *
+ * @return boolean true if abort confirmed
+ */
+global boolean PollAbort() {
+    if (UI::PollInput() == `abort)
+	return Abort();
+
+    return false;
+}
+
+/**
+ * Reads current supportconfig configuration
+ */
+boolean ReadsupportconfigSettings () {
+    foreach (string key, (list <string>) SCR::Dir(.ntsutils), {
+	list <string> val = (list <string>) SCR::Read(add(.ntsutils, key));
+        if (val != nil) SETTINGS[key] = val;
+    });
+
+    y2milestone("supportconfig configuration has been read: %1", SETTINGS);
+    return true;
+}
+
+/**
+ * Writes current supportconfig configuration
+ */
+boolean WritesupportconfigSettings () {
+    y2milestone("Writing supportconfig configuration: %1", SETTINGS);
+
+    foreach (string option_key, list <string> option_val, SETTINGS, {
+	SCR::Write(add(.ntsutils, option_key), option_val);
+    });
+    // This is very important
+    // it flushes the cache, and stores the configuration on the disk
+    SCR::Write(.ntsutils, nil);
+
+    return true;
+}
+
+
+/**
+ * Read all supportconfig settings
+ * @return true on success
+ */
+global boolean Read() {
+
+    /* Ntsutils read dialog caption */
+    string caption = _("Initializing supportconfig Configuration");
+
+    integer steps = 1;
+
+    Progress::New( caption, " ", steps, [
+	    /* Progress stage 1/1 */
+	    _("Read current supportconfig Configuration"),
+	], [
+	    /* Progress step 1/1 */
+	    _("Reading current supportconfig Configuration..."),
+	    /* Progress finished */
+	    Message::Finished()
+	],
+	""
+    );
+
+    sleep(sl);
+
+    if(PollAbort()) return false;
+    Progress::NextStage();
+    /* Error message */
+    if(!ReadsupportconfigSettings()) Report::Error(Message::CannotReadCurrentSettings());
+    sleep(sl);
+
+    if(PollAbort()) return false;
+    /* Progress finished */
+    Progress::NextStage();
+    sleep(sl);
+
+    modified = false;
+    return true;
+}
+
+/**
+ * Write all ntsutils settings
+ * @return true on success
+ */
+global boolean Write() {
+
+    /* Ntsutils read dialog caption */
+    string caption = _("Saving supportconfig Configuration");
+
+    integer steps = 1;
+
+    Progress::New(caption, " ", steps, [
+	    /* Progress stage 1/1 */
+	    _("Write the supportconfig settings"),
+	], [
+	    /* Progress step 1/2 */
+	    _("Writing the supportconfig settings..."),
+	    /* Progress finished */
+	    Message::Finished()
+	],
+	""
+    );
+
+    sleep(sl);
+
+    if(PollAbort()) return false;
+    Progress::NextStage();
+    /* Error message */
+    if(!WritesupportconfigSettings()) Report::Error (_("Cannot write supportconfig Settings."));
+    sleep(sl);
+
+    Progress::NextStage();
+    sleep(sl);
+
+    return true;
+}
+
+/* EOF */
+}

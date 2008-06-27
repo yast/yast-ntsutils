@@ -1,0 +1,13 @@
+{
+
+// testedfiles: Ntsutils.ycp
+
+include "testsuite.ycp";
+TESTSUITE_INIT([], nil);
+
+import "Ntsutils";
+
+DUMP("Ntsutils::Modified");
+TEST(``(Ntsutils::Modified()), [], nil);
+
+}
