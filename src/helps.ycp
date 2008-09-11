@@ -47,20 +47,20 @@ Please wait...<br></p>
 "),
 
     /* supportconfig dialog help 1/3 */
-    "supportconfig_setup1" : _("<p><b><big>supportconfig Setup</big></b><br>
-<br>
-<b>Output Location:</b> Tell supportconfig where its going to output a tarball with all of the information it gathers.<br>
-<br>
-<b>Options...</b><br>
-<b>Use Defaults</b>-Execute supportconfig with default settings.<br>
-<b>Exclude detailed disk info and scans</b>-Minimizes the amount of disk information and detailed scanning.<br>
-<b>Search for eDirectory Instances</b>-Tells   the   supportconfig   to  search  the  file  system  for  all  eDirectory  instances files. If set then \"Create a full file listing from /\" is automatically set as well.<br>
-<b>Gather additional Logs</b>-Includes the entire log file, including comments, instead of just number of lines  of  it. Additional rotated logs are also included if available.<br>
-<b>Gather minimum amount of info</b>-Only gather a minimum amount of info: basic environment, basic health, hardware, rpm, messages, y2logs.<br>
-<b>Include full SLP service lists</b>-Normally only the base SLP service types are listed. This option allows you to query each of the discovered service types individually.<br>
-<b>Create a full file listing from /</b>-A full file list using find from the root of the filesytem.<br>
-<b>Perform rpm Verify for every installed rpm</b>-Runs an rpm -V on every installed RPM package. This takes some time to complete.<br>
-</p>"),
+    "supportconfig_setup1" : _("<p><b><big>supportconfig Setup</big></b><br>\n"
+"<br>\n"
+"<b>Output Location:</b> Tell supportconfig where its going to output a tarball with all of the information it gathers.<br>\n"
+"<br>\n"
+"<b>Options...</b><br>\n"
+"<b>Use Defaults</b>-Execute supportconfig with default settings.<br>\n"
+"<b>Exclude detailed disk info and scans</b>-Minimizes the amount of disk information and detailed scanning.<br>\n"
+"<b>Search for eDirectory Instances</b>-Tells the supportconfig to search the file system for all eDirectory instances files. If set then\"Create a full file listing from /\" is automatically set as well.<br>\n"
+"<b>Gather additional Logs</b>-Includes the entire log file, including comments, instead of just number of lines of it. Additional rotated logs are also included if available.<br>\n"
+"<b>Gather minimum amount of info</b>-Only gather a minimum amount of info: basic environment, basic health, hardware, rpm, messages, y2logs.<br>\n"
+"<b>Include full SLP service lists</b>-Normally only the base SLP service types are listed. This option allows you to query each of the discovered service types individually.<br>\n"
+"<b>Create a full file listing from /</b>-A full file list using find from the root of the filesytem.<br>\n"
+"<b>Perform rpm Verify for every installed rpm</b>-Runs an rpm -V on every installed RPM package. This takes some time to complete.<br>\n"
+"</p>"),
 
     /* supportconfig dialog help 2/3 */
     "supportconfig_setup2" : _("<p><b><big>supportconfig Setup</big></b><br>
