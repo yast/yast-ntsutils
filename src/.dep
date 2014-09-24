@@ -1,8 +1,0 @@
-Ntsutils.ybc: \
-	/usr/share/YaST2/modules/Progress.ybc \
-	/usr/share/YaST2/modules/Report.ybc \
-	/usr/share/YaST2/modules/Summary.ybc \
-	/usr/share/YaST2/modules/Message.ybc \
-	/usr/share/YaST2/modules/Service.ybc \
-	/usr/share/YaST2/modules/Popup.ybc
-
